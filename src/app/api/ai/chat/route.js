@@ -12,16 +12,22 @@ export async function POST(request) {
             );
         }
 
-        // Get AI response (can be string or object with content/buttons/product)
-        const aiResponse = await getAIResponse(message, history || [], context);
+        // Call the Python AI API
+        const aiApiUrl = process.env.NEXT_PUBLIC_AI_API_URL || 'http://localhost:5050';
+        const response = await fetch(`${aiApiUrl}/api/ai/chat`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message, history, context }),
+        });
 
-        // If response is a string, convert to object
-        const responseData = typeof aiResponse === 'string'
-            ? { content: aiResponse }
-            : aiResponse;
+        if (!response.ok) {
+            throw new Error(`AI API responded with status: ${response.status}`);
+        }
+
+        const data = await response.json();
 
         return NextResponse.json({
-            response: responseData,
+            response: data.response,
             timestamp: new Date().toISOString(),
         });
     } catch (error) {

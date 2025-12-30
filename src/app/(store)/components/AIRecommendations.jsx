@@ -127,8 +127,14 @@ export default function AIRecommendations({ userId = 'ahmed', limit = 4 }) {
   useEffect(() => {
     const fetchRecommendations = async () => {
       try {
+        const aiApiUrl = process.env.NEXT_PUBLIC_AI_API_URL || 'http://localhost:5050';
         // Calling my Python AI API
-        const res = await fetch(`http://localhost:5050/api/recommendations/${userId}?num=${limit}`);
+        const res = await fetch(`${aiApiUrl}/api/recommendations/${userId}?num=${limit}`);
+
+        if (!res.ok) {
+          throw new Error(`AI API responded with status: ${res.status}`);
+        }
+
         const data = await res.json();
         if (data.success) {
           setRecommendations(data.recommendations);

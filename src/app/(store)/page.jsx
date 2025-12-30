@@ -256,6 +256,8 @@ const isVariableProduct = (product) => {
   return product.type === 'variable' || (product.variants && product.variants.length > 0);
 };
 
+import AIRecommendations from './components/AIRecommendations';
+
 export default function StorePage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -355,6 +357,11 @@ export default function StorePage() {
             </ViewAllLink>
           </>
         )}
+      </Section>
+
+      {/* AI Recommendations Section */}
+      <Section style={{ paddingTop: 0 }}>
+        <AIRecommendations userId="ahmed" limit={4} />
       </Section>
 
       {/* Features */}

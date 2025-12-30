@@ -338,6 +338,8 @@ const getProductPrice = (product, selectedVariation) => {
   return 'السعر حسب الاختيار';
 };
 
+import AIRecommendations from '../../components/AIRecommendations';
+
 export default function ProductDetailsPage() {
   const { productId } = useParams();
   const [product, setProduct] = useState(null);
@@ -603,6 +605,11 @@ export default function ProductDetailsPage() {
             </Features>
           </InfoSection>
         </ProductLayout>
+
+        {/* AI Recommendations Section */}
+        <div style={{ marginTop: '4rem' }}>
+          <AIRecommendations userId="ahmed" limit={4} />
+        </div>
       </Container>
     </PageContainer >
   );

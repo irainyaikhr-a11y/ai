@@ -204,29 +204,52 @@ class APIHandler(BaseHTTPRequestHandler):
             self._send_json({'success': False, 'error': 'Invalid JSON'}, 400)
             return
         
-        # Record interaction
-        if path == '/api/interact':
-            user_id = data.get('user_id')
-            content_id = data.get('content_id')
-            int_type = data.get('type', 'view')
-            rating = data.get('rating')
+        # AI Chatbot
+        if path == '/api/ai/chat':
+            message = data.get('message', '').lower()
+            history = data.get('history', [])
             
-            if not user_id or not content_id:
-                self._send_json({'success': False, 'error': 'Missing parameters'}, 400)
-                return
+            # Simple keyword-based AI logic for the demo
+            response_content = "أنا العواد، خبير العسل ديالكم! 🐝"
+            buttons = []
+            recommended_product = None
             
-            success = engine.record_interaction(user_id, content_id, int_type, rating)
-            
-            if success:
-                engine.save_to_file(DATA_FILE)
-                self._send_json({
-                    'success': True,
-                    'message': 'Interaction recorded',
-                    'ai_learning': True
-                })
+            if 'زعتر' in message or 'سعال' in message:
+                response_content = "عسل الزعتر واعر بزاف للسعال والمناعة! 🌿 واش بغيتي نزيدو ليك للسلة؟"
+                recommended_product = engine._get_content('honey_thyme')
+            elif 'أوكالبتوس' in message or 'برد' in message:
+                response_content = "عسل الأوكالبتوس زوين للبرد والصدر! 🌲 كينقي الشعب الهوائية."
+                recommended_product = engine._get_content('honey_eucalyptus')
+            elif 'سدر' in message or 'فاخر' in message:
+                response_content = "عسل السدر هو الملك! 🌟 فاخر وغني بالفوائد. ممتاز للطاقة."
+                recommended_product = engine._get_content('honey_sidr')
+            elif 'ثمن' in message or 'شحال' in message:
+                response_content = "الأسعار عندنا كتبدا من 100 درهم! 💰 كل نوع وثمنه، واش بغيتي تعرف ثمن شي نوع محدد؟"
+            elif 'سلام' in message or 'مرحبا' in message:
+                response_content = "السلام عليكم! 🐝 أنا العواد، كيفاش نقدر نعاونك اليوم فـ عالم العسل؟ 🍯"
             else:
-                self._send_json({'success': False, 'error': 'Failed to record'}, 400)
-        
+                # Get a general recommendation if no keyword matches
+                recs = engine.get_recommendations('ahmed', 1) # Default user for demo
+                if recs:
+                    top_rec = recs[0]
+                    response_content = f"كنقترح عليك تجرب {top_rec['title']}، راه مطلوب بزاف هاد الأيام! ✨"
+                    recommended_product = engine._get_content(top_rec['id'])
+
+            if recommended_product:
+                buttons = [
+                    {'type': 'add-to-cart', 'productId': recommended_product['id'], 'label': '🛒 زيد للعربة'},
+                    {'type': 'view-product', 'productId': recommended_product['id'], 'label': '👁️ شوف المنتج'}
+                ]
+
+            self._send_json({
+                'success': True,
+                'response': {
+                    'content': response_content,
+                    'buttons': buttons,
+                    'product': recommended_product
+                }
+            })
+            
         else:
             self._send_json({'success': False, 'error': 'Not found'}, 404)
     
